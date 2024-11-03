@@ -1,0 +1,38 @@
+/******************************************************************************
+ *
+ * Module: Timer
+ *
+ * File Name: timer.c
+ *
+ * Description: Header file for the AVR Timers driver
+ *
+ * Author: Abdelrahman Essa
+ *
+ *******************************************************************************/
+
+#ifndef MCAL_TIMER_TIMER_H_
+#define MCAL_TIMER_TIMER_H_
+
+#include "../../std_types.h"
+
+/*******************************************************************************
+ *                               Types Declaration                             *
+ *******************************************************************************/
+
+/* Enumeration for Timer ID */
+typedef enum{
+	Timer0_ID, Timer1_ID, Timer2_ID
+}Timer_ID_Type;
+
+/* Enumeration for Timer Clock Select */
+typedef enum{
+
+}Timer_ClockType;
+
+/*******************************************************************************
+ *                              Functions Prototypes                           *
+ *******************************************************************************/
+
+
+
+#endif /* MCAL_TIMER_TIMER_H_ */

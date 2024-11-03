@@ -1,0 +1,195 @@
+/******************************************************************************
+ *
+ * Module: Timer
+ *
+ * File Name: timer.c
+ *
+ * Description: Source file for the AVR Timers driver
+ *
+ * Author: Abdelrahman Essa
+ *
+ *******************************************************************************/
+
+#include "timer.h"
+#include <avr/io.h> /* To use the Timer Registers */
+#include <avr/interrupt.h> /* For Timer ISR */
+#include "../../common_macros.h" /* To use the macros */
+
+/*******************************************************************************
+ *                           Global Variables                                  *
+ *******************************************************************************/
+
+/* Global variables to hold the address of the call back function in the application */
+static volatile void (*g_callBackPtr_Timer0)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer1)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer2)(void) = NULL_PTR;
+
+/*******************************************************************************
+ *                       Interrupt Service Routines                            *
+ *******************************************************************************/
+
+/* ISR For Timer0 in Normal Mode */
+ISR(TIMER0_OVF_vect)
+{
+	if(g_callBackPtr_Timer0 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer0)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer0 in CTC Mode */
+ISR(TIMER0_COMP_vect)
+{
+	if(g_callBackPtr_Timer0 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer0)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer1 in Normal Mode */
+ISR(TIMER1_OVF_vect)
+{
+	if(g_callBackPtr_Timer1 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer1)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer1 in CTC Mode */
+ISR(TIMER1_COMPA_vect)
+{
+	if(g_callBackPtr_Timer1 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer1)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer2 in Normal Mode */
+ISR(TIMER2_OVF_vect)
+{
+	if(g_callBackPtr_Timer2 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer2)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer2 in CTC Mode */
+ISR(TIMER2_COMP_vect)
+{
+	if(g_callBackPtr_Timer2 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer2)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/*******************************************************************************
+ *                      Functions Definitions                                  *
+ *******************************************************************************/
+
+/**
+ * @brief  Function To Initialize the Timer by the Given Settings.
+ * @param  Constant pointer to the Settings Data.
+ * @return void.
+ */
+void Timer_init(const Timer_ConfigType *Config_Ptr)
+{
+	switch(Config_Ptr->timer_ID)
+	{
+	case TIMER0_ID:
+
+		TCCR0 = (1 << FOC0);
+
+		/* Load the initial value to Timer0 counter */
+		TCNT0 = (uint8)Config_Ptr->timer_InitialValue;
+
+		if (Config_Ptr->timer_mode == TIMER_NORMAL)
+		{
+			/* Enable Timer0 Overflow Interrupt */
+			TIMSK |= (1 << TOIE0);
+		}
+		else if(Config_Ptr->timer_mode == TIMER_CTC)
+		{
+			/* Setting Timer0 to CTC */
+			TCCR0 = (1 << WGM01);
+
+			/* Enable Timer0 Compare Interrupt */
+			TIMSK |= (1 << OCIE0);
+
+			/* Storing the Compare Match Value */
+			OCR0 = (uint8)Config_Ptr->timer_compare_MatchValue;
+		}
+		else
+		{
+			/* Do nothing */
+		}
+
+		/* Start Timer0 */
+		TCCR0 |= (Config_Ptr->timer_clock);
+
+		break;
+	case TIMER1_ID:
+
+		/* Load the initial value to Timer1 counter */
+		TCNT1 = Config_Ptr->timer_InitialValue;
+
+		if (Config_Ptr->timer_mode == TIMER_NORMAL)
+		{
+			/* Enable Timer0 Overflow Interrupt */
+			TIMSK |= (1 << TOIE1);
+		}
+		else if(Config_Ptr->timer_mode == TIMER_CTC)
+		{
+			/* Setting CTC Mode */
+			TCCR1B = (1 << WGM12);
+
+			/* Enable Timer0 Compare Interrupt */
+			TIMSK |= (1 << OCIE1A);
+
+			/* Storing the Compare Match Value */
+			OCR1A = Config_Ptr->timer_compare_MatchValue;
+		}
+		else
+		{
+			/* Do nothing */
+		}
+
+		/* Setting Timer0 Controls */
+		TCCR1A = (1 << FOC1A) | (1 << FOC1B);
+		TCCR1B |= (Config_Ptr->timer_clock);
+
+		break;
+	case TIMER2_ID:
+
+		/* Load the initial value to Timer1 counter */
+		TCNT2 = (uint8)Config_Ptr->timer_InitialValue;
+
+		if (Config_Ptr->timer_mode == TIMER_NORMAL)
+		{
+			/* Enable Timer0 Overflow Interrupt */
+			TIMSK |= (1 << TOIE2);
+		}
+		else if(Config_Ptr->timer_mode == TIMER_CTC)
+		{
+			/* Enable Timer0 Compare Interrupt */
+			TIMSK |= (1 << OCIE2);
+
+			/* Storing the Compare Match Value */
+			OCR2 = (uint8)Config_Ptr->timer_compare_MatchValue;
+		}
+		else
+		{
+			/* Do nothing */
+		}
+
+		/* Setting Timer0 Controls */
+		TCCR2 = ;
+
+		break;
+	}
+}

@@ -1,0 +1,10 @@
+/*
+ * pir.c
+ *
+ *  Created on: Nov 1, 2024
+ *      Author: Essa
+ */
+
+#include "pir.h"
+#include "../../MCAL/GPIO/gpio.h"
+#include "../../std_types.h"

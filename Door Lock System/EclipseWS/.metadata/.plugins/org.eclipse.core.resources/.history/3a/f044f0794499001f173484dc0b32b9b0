@@ -1,0 +1,116 @@
+/*
+ ============================================================================
+ Name        : control_ecu.c
+ Author      : Abdelrahman Essa
+ Date        : 2/11/2024
+ Description : Control ECU Handler
+ ============================================================================
+ */
+
+/************** Includes **************/
+#include "std_types.h"
+#include <util/delay.h>
+#include "MCAL/UART/uart.h"
+#include "MCAL/I2C/twi.h"
+#include "MCAL/Timer/timer.h"
+#include "HAL/Buzzer/buzzer.h"
+#include "HAL/EXT_EEPROM/external_eeprom.h"
+#include "HAL/Motor/motor.h"
+#include "HAL/PIR/pir.h"
+
+#define PASS_READY       0xA0
+#define PASS_CORRECT     0xC0
+#define PASS_FAIL        0xF0
+#define start_address    0x0005
+
+int main()
+{
+	/********** Initializations **********/
+	/* UART Initialization */
+	UART_ConfigType uart_cfg = {UART_8BIT_DATA, UART_Parity_OFF, UART_STOPBIT_1, 9600};
+	UART_init(&uart_cfg);
+
+	/* BUZZER Initialization */
+	Buzzer_init();
+
+	/* I2C Initialization */
+	TWI_ConfigType i2c_cfg = {0x01, 2, TWI_PRE_1};
+	TWI_init(&i2c_cfg);
+
+	/* Motor Initialization */
+	DcMotor_Init();
+
+	/* PIR Initialization */
+	PIR_init();
+
+	/* Variable to store password */
+	uint8 pass[10] = {0};
+	uint8 i = 0;
+	boolean passIN = FALSE;
+
+	/************** Program **************/
+	for(;;)
+	{
+		if(!passIN)
+		{
+			/* Start Receiving New password */
+			for(i = 0; i < 10; ++i)
+			{
+				pass[i] = UART_receiveByte();
+			}
+
+			/* Checking pass */
+			for(i = 0; i < 5; ++i)
+			{
+				if(pass[i] != pass[i + 5])
+				{
+					/* Sending HMI that pass is not matched */
+					UART_sendByte(PASS_FAIL);
+					break;
+				}
+			}
+			if(i == 5)
+			{
+				/* Sending HMI that pass is correct */
+				UART_sendByte(PASS_CORRECT);
+
+				/* Storing new pass to the External EEPROM */
+				uint16 address = start_address;
+				boolean status = FALSE;
+				for(i = 0; i < 5; ++i)
+				{
+					status = EEPROM_writeByte(address, pass[i]);
+					_delay_ms(10);
+					++address;
+				}
+				passIN = TRUE;
+			}
+		}
+		else
+		{
+			/* Start Receiving Old password */
+			for(i = 0; i < 10; ++i)
+			{
+				pass[i] = UART_receiveByte();
+			}
+
+			/* Checking pass */
+			for(i = 0; i < 5; ++i)
+			{
+				if(pass[i] != pass[i + 5])
+				{
+					/* Sending HMI that pass is not matched */
+					UART_sendByte(PASS_FAIL);
+					break;
+				}
+			}
+			if(i == 5)
+			{
+				/* Sending HMI that pass is correct */
+				UART_sendByte(PASS_CORRECT);
+
+
+			}
+		}
+	}
+}

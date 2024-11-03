@@ -1,0 +1,38 @@
+22:23:39 **** Incremental Build of configuration Debug for project HMI_ECU ****
+make all 
+Building file: ../hmi_ecu.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g3 -gdwarf-2 -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"hmi_ecu.d" -MT"hmi_ecu.o" -c -o "hmi_ecu.o" "../hmi_ecu.c"
+Finished building: ../hmi_ecu.c
+ 
+Building target: HMI_ECU.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,HMI_ECU.map -mmcu=atmega32 -o "HMI_ECU.elf"  ./MCAL/UART/uart.o  ./MCAL/Timer/timer.o  ./MCAL/GPIO/gpio.o  ./HAL/LCD/lcd.o  ./HAL/Keypad/keypad.o  ./hmi_ecu.o   
+Finished building target: HMI_ECU.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S HMI_ECU.elf  >"HMI_ECU.lss"
+Finished building: HMI_ECU.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex HMI_ECU.elf  "HMI_ECU.hex"
+Finished building: HMI_ECU.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 HMI_ECU.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:   15932 bytes (48.6% Full)
+(.text + .data + .bootloader)
+
+Data:        247 bytes (12.1% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+22:23:40 Build Finished. 0 errors, 0 warnings. (took 496ms)
+

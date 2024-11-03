@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;HMI_ECU/MCAL/TIMER&apos; to &apos;Timer&apos;" description="Rename resource &apos;TIMER&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="MCAL/TIMER" name="Timer" stamp="1730480181596" updateReferences="true"/>
+</session>

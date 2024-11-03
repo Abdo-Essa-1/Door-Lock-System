@@ -1,0 +1,90 @@
+/*
+ ============================================================================
+ Name        : control_ecu.c
+ Author      : Abdelrahman Essa
+ Date        : 2/11/2024
+ Description : Control ECU Handler
+ ============================================================================
+ */
+
+/************** Includes **************/
+#include "std_types.h"
+#include <util/delay.h>
+#include "MCAL/UART/uart.h"
+#include "MCAL/I2C/twi.h"
+#include "MCAL/Timer/timer.h"
+#include "HAL/Buzzer/buzzer.h"
+#include "HAL/EXT_EEPROM/external_eeprom.h"
+#include "HAL/Motor/motor.h"
+#include "HAL/PIR/pir.h"
+
+#define PASS_READY       0xA0
+#define PASS_CORRECT     0xC0
+#define PASS_FAIL        0xF0
+
+int main()
+{
+	/********** Initializations **********/
+	/* UART Initialization */
+	UART_ConfigType uart_cfg = {UART_8BIT_DATA, UART_Parity_OFF, UART_STOPBIT_1, 9600};
+	UART_init(&uart_cfg);
+	uint8 uart_ready = 0;
+
+	/* BUZZER Initialization */
+	Buzzer_init();
+
+	/* I2C Initialization */
+	TWI_ConfigType i2c_cfg = {0x01, 2, TWI_PRE_1};
+	TWI_init(&i2c_cfg);
+
+	/* Motor Initialization */
+	DcMotor_Init();
+
+	/* PIR Initialization */
+	PIR_init();
+
+	/* Variable to store password */
+	uint8 pass[10] = {0};
+	uint8 i = 0;
+
+	/************** Program **************/
+	for(;;)
+	{
+		/* Waiting HMI ECU to send pass */
+//		do{
+//			uart_ready = UART_receiveByte();
+//		}while(uart_ready != PASS_READY);
+//		UART_sendByte(1);
+//		uart_ready = 0;
+
+		/* Start Receiving password */
+		for(i = 0; i < 10; ++i)
+		{
+			pass[i] = UART_receiveByte();
+		}
+
+		/* Checking pass */
+		for(i = 0; i < 5; ++i)
+		{
+			if(pass[i] != pass[i + 5])
+			{
+				/* Sending HMI that pass is not matched */
+				UART_sendByte(PASS_FAIL);
+				break;
+			}
+		}
+		if(i == 5)
+		{
+			/* Sending HMI that pass is correct */
+			UART_sendByte(PASS_CORRECT);
+
+			/* Storing new pass to the External EEPROM */
+			uint16 start_address = 0x0005;
+			for(i = 0; i < 5; ++i)
+			{
+				EEPROM_writeByte(start_address, pass[i]);
+				++start_address;
+			}
+		}
+	}
+}

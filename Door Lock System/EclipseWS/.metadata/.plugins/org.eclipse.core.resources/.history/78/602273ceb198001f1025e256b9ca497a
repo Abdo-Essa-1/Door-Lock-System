@@ -1,0 +1,21 @@
+/******************************************************************************
+ *
+ * Module: Timer
+ *
+ * File Name: timer.c
+ *
+ * Description: Source file for the AVR Timers driver
+ *
+ * Author: Abdelrahman Essa
+ *
+ *******************************************************************************/
+
+#include "timer.h"
+#include <avr/io.h> /* To use the Timer Registers */
+#include <avr/interrupt.h> /* For Timer ISR */
+#include "../../common_macros.h" /* To use the macros */
+
+/*******************************************************************************
+ *                      Functions Definitions                                  *
+ *******************************************************************************/
+

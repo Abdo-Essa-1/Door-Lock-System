@@ -1,0 +1,91 @@
+/*
+ ============================================================================
+ Name        : hmi_ecu.c
+ Author      : Abdelrahman Essa
+ Date        : 2/11/2024
+ Description : Human Interface ECU Handler
+ ============================================================================
+ */
+
+/************** Includes **************/
+#include "std_types.h"
+#include <util/delay.h>
+#include "MCAL/UART/uart.h"
+#include "MCAL/Timer/timer.h"
+#include "HAL/LCD/lcd.h"
+#include "HAL/Keypad/keypad.h"
+
+#define PASS_READY       0xA0
+#define PASS_CORRECT     0xC0
+#define PASS_FAIL        0xF0
+
+int main()
+{
+	/********** Initializations **********/
+	/* LCD Initialization */
+	LCD_init();
+
+	/* UART Initialization */
+	UART_ConfigType uart_cfg = {UART_8BIT_DATA, UART_Parity_OFF, UART_STOPBIT_1, 9600};
+	UART_init(&uart_cfg);
+	uint8 uart_ready = 0;
+
+	/* Array to Store Password */
+	uint8 pass[5] = {0};
+	uint8 confirm_pass[5] = {0};
+	uint8 i = 0;
+	uint8 pass_state = 0;
+
+	/************** Program **************/
+	for(;;)
+	{
+		/* Enter Password for the first Time */
+		LCD_clearScreen();
+		LCD_displayString("Plz Enter Pass:");
+		LCD_moveCursor(1, 0);
+		for(i = 0; i < 5; ++i)
+		{
+			pass[i] = KEYPAD_getPressedKey();
+			LCD_displayCharacter('*');
+			_delay_ms(500);
+		}
+		while(KEYPAD_getPressedKey() != '=');
+		_delay_ms(500);
+		LCD_clearScreen();
+		LCD_displayString("Plz re-enter the");
+		LCD_displayStringRowColumn(1, 0, "same pass: ");
+		for(i = 0; i < 5; ++i)
+		{
+			confirm_pass[i] = KEYPAD_getPressedKey();
+			LCD_displayCharacter('*');
+			_delay_ms(500);
+		}
+		while(KEYPAD_getPressedKey() != '=');
+		_delay_ms(500);
+
+		/* Sending Data to Control ECU Using UART */
+		do{
+			UART_sendByte(PASS_READY);
+			uart_ready = UART_receiveByte();
+		}while(!uart_ready);
+		for(i = 0; i < 5; ++i)
+		{
+			UART_sendByte(pass[i]);
+		}
+		for(i = 0; i < 5; ++i)
+		{
+			UART_sendByte(confirm_pass[i]);
+		}
+
+		/* Checking pass correction */
+		do{
+			pass_state = UART_receiveByte();
+		}while(!pass_state);
+		if(pass_state == PASS_CORRECT)
+		{
+			LCD_clearScreen();
+			LCD_displayString("+ : OPEN DOOR");
+			LCD_displayStringRowColumn(1, 0, "- : CHANGE PASS");
+		}
+	}
+}

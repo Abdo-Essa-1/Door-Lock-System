@@ -1,0 +1,76 @@
+/******************************************************************************
+ *
+ * Module: Timer
+ *
+ * File Name: timer.c
+ *
+ * Description: Source file for the AVR Timers driver
+ *
+ * Author: Abdelrahman Essa
+ *
+ *******************************************************************************/
+
+#include "timer.h"
+#include <avr/io.h> /* To use the Timer Registers */
+#include <avr/interrupt.h> /* For Timer ISR */
+#include "../../common_macros.h" /* To use the macros */
+
+/*******************************************************************************
+ *                           Global Variables                                  *
+ *******************************************************************************/
+
+/* Global variables to hold the address of the call back function in the application */
+static volatile void (*g_callBackPtr_Timer0)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer1)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer1COMA)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer1COMB)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr_Timer2)(void) = NULL_PTR;
+
+/*******************************************************************************
+ *                       Interrupt Service Routines                            *
+ *******************************************************************************/
+
+/* ISR For Timer0 in Normal Mode */
+ISR(TIMER0_OVF_vect)
+{
+	if(g_callBackPtr_Timer0 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer0)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer0 in CTC Mode */
+ISR(TIMER0_COMP_vect)
+{
+	if(g_callBackPtr_Timer0 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer0)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer1 in Normal Mode */
+ISR(TIMER1_OVF_vect)
+{
+	if(g_callBackPtr_Timer1 != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer1)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/* ISR For Timer1 in Normal Mode */
+ISR(TIMER1_COMPA_vect)
+{
+	if(g_callBackPtr_Timer1COMA != NULL_PTR)
+	{
+		/* Call the Call Back function in the application after the edge is detected */
+		(*g_callBackPtr_Timer1COMA)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+	}
+}
+
+/*******************************************************************************
+ *                      Functions Definitions                                  *
+ *******************************************************************************/
+
